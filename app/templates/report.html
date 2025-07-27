@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <title>Smart Report Assistant – Bericht</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2em;
+        background-color: #f9f9f9;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2em;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1, h2 {
+        margin-top: 0;
+      }
+      .plots {
+        display: flex;
+        flex-direction: column;
+        gap: 2em;
+      }
+      .plots img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 4px;
+        background: #fff;
+      }
+      .back-link {
+        margin-top: 2em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Bericht</h1>
+      <p>{{ summary }}</p>
+      {% if recommendations %}
+        <h2>Empfehlungen</h2>
+        <p>{{ recommendations }}</p>
+      {% endif %}
+      <div class="plots">
+        {% if bar_chart %}
+          <div>
+            <h2>Top‑Risiken</h2>
+            <img src="{{ url_for('static', filename='plots/' + bar_chart) }}" alt="Balkendiagramm Top‑Risiken">
+          </div>
+        {% endif %}
+        {% if line_chart %}
+          <div>
+            <h2>Risiko‑Verlauf</h2>
+            <img src="{{ url_for('static', filename='plots/' + line_chart) }}" alt="Liniendiagramm Risiko‑Verlauf">
+          </div>
+        {% endif %}
+      </div>
+      <div class="back-link">
+        <a href="{{ url_for('index') }}">Neue Datei hochladen</a>
+      </div>
+    </div>
+  </body>
+</html>
