@@ -245,7 +245,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Ensure file size is reasonable
 
 ### **Getting Help**
-- 📧 **Email**: [Your contact email]
 - 💬 **Issues**: [GitHub Issues](https://github.com/YuryBesiakov/Smart-Report-Assistant/issues)
 - 📖 **Documentation**: See `GPT_SETUP.md` for detailed GPT configuration
 
