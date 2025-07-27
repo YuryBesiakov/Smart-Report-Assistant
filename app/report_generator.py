@@ -16,10 +16,25 @@ Zusammenfassung einbauen.
 import os
 import uuid
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Optional
 
 import pandas as pd
 import matplotlib
+
+# Try to import OpenAI, fall back gracefully if not available
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    print("OpenAI package not available - using statistical analysis only")
+
+try:
+    from dotenv import load_dotenv
+    # Load environment variables
+    load_dotenv()
+except ImportError:
+    print("python-dotenv not available - please set environment variables manually")
 
 # Verwende das Agg‑Backend, da kein GUI verfügbar ist.
 matplotlib.use("Agg")  # type: ignore
@@ -177,34 +192,189 @@ def generate_summary(df: pd.DataFrame) -> Dict[str, str]:
     return {"summary": summary_text, "recommendations": recommendations}
 
 
-def generate_report_data(file_path: str) -> Dict[str, str]:
+def generate_report_data(file_path: str, use_gpt: bool = True) -> Dict[str, str]:
     """Liest Daten, erstellt Diagramme und fasst sie zusammen.
+
+    Args:
+        file_path: Path to the CSV file to analyze
+        use_gpt: Whether to use GPT for enhanced analysis (default: True)
 
     Gibt ein Dictionary zurück, das an das HTML‑Template übergeben werden kann.
     """
     df = read_csv(file_path)
     bar_chart = generate_bar_chart(df)
     line_chart = generate_line_chart(df)
-    summary_dict = generate_summary(df)
+    
+    # Try GPT analysis first, fall back to basic analysis if needed
+    gpt_available = OPENAI_AVAILABLE and os.getenv('OPENAI_API_KEY') and os.getenv('OPENAI_API_KEY') != 'your-openai-api-key-here'
+    
+    if use_gpt and gpt_available:
+        summary_dict = generate_summary_gpt(df)
+        analysis_type = "GPT-Enhanced"
+    else:
+        summary_dict = generate_summary(df)
+        analysis_type = "Statistical"
+    
     return {
         "bar_chart": bar_chart,
         "line_chart": line_chart,
         "summary": summary_dict.get("summary", ""),
         "recommendations": summary_dict.get("recommendations", ""),
+        "analysis_type": analysis_type
     }
 
 
-def generate_summary_gpt(df: pd.DataFrame, api_key: str) -> str:
-    """Platzhalter für die Integration eines externen Sprachmodells.
+def generate_summary_gpt(df: pd.DataFrame, api_key: Optional[str] = None) -> Dict[str, str]:
+    """Generates advanced summary and recommendations using OpenAI GPT.
 
-    Aktuell wird diese Funktion nicht verwendet. Wenn ein API‑Key vorliegt,
-    kann hier die Anbindung an ein Modell wie GPT erfolgen, um eine
-    fortgeschrittene Zusammenfassung zu erzeugen.
+    Uses GPT to analyze the dataset and provide intelligent insights,
+    recommendations, and detailed analysis of risk patterns.
+    
+    Args:
+        df: The pandas DataFrame containing the risk data
+        api_key: Optional OpenAI API key (if not provided, uses environment variable)
+    
+    Returns:
+        Dictionary with 'summary' and 'recommendations' keys
     """
-    # Beispielhafte Implementierung (pseudo-code):
-    # import openai
-    # prompt = f"Analysiere den folgenden Datensatz: {df.head().to_string()}"
-    # openai.api_key = api_key
-    # response = openai.ChatCompletion.create(...)
-    # return response.choices[0].message['content']
-    raise NotImplementedError("External GPT summarization not implemented.")
+    # Check if OpenAI is available
+    if not OPENAI_AVAILABLE:
+        print("OpenAI package not available - falling back to statistical analysis")
+        return generate_summary(df)
+    
+    try:
+        # Get API key from parameter or environment
+        if not api_key:
+            api_key = os.getenv('OPENAI_API_KEY')
+        
+        if not api_key or api_key == 'your-openai-api-key-here':
+            # Fallback to basic summary if no valid API key
+            return generate_summary(df)
+        
+        # Initialize OpenAI client
+        client = OpenAI(api_key=api_key)
+        
+        # Prepare data summary for GPT
+        data_summary = prepare_data_for_gpt(df)
+        
+        # Create prompt for GPT analysis
+        prompt = f"""
+You are a senior risk analyst. Analyze the following business risk data and provide:
+
+1. A comprehensive summary of the risk landscape
+2. Specific, actionable recommendations
+
+Data Summary:
+{data_summary}
+
+Please provide:
+- A detailed analysis of risk patterns, trends, and key insights
+- Specific recommendations for risk mitigation and management
+- Identification of the most critical risk areas requiring immediate attention
+
+Format your response as professional business analysis suitable for executive reporting.
+Keep the summary concise but comprehensive (2-3 paragraphs) and recommendations actionable (3-5 specific points).
+"""
+
+        # Call GPT API
+        response = client.chat.completions.create(
+            model=os.getenv('OPENAI_MODEL', 'gpt-3.5-turbo'),
+            messages=[
+                {"role": "system", "content": "You are an expert risk analyst providing professional business insights."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=800,
+            temperature=0.7
+        )
+        
+        # Parse the response
+        full_response = response.choices[0].message.content
+        
+        # Split into summary and recommendations
+        summary, recommendations = parse_gpt_response(full_response)
+        
+        return {
+            "summary": summary,
+            "recommendations": recommendations
+        }
+        
+    except Exception as e:
+        print(f"GPT API error: {e}")
+        # Fallback to basic summary if GPT fails
+        return generate_summary(df)
+
+
+def prepare_data_for_gpt(df: pd.DataFrame) -> str:
+    """Prepares a concise data summary for GPT analysis."""
+    summary_parts = []
+    
+    # Basic dataset info
+    summary_parts.append(f"Dataset contains {len(df)} records spanning from {df['Date'].min()} to {df['Date'].max()}")
+    
+    # Risk categories and scores
+    if 'RiskCategory' in df.columns and 'Risikoscore' in df.columns:
+        category_stats = df.groupby('RiskCategory')['Risikoscore'].agg(['sum', 'mean', 'count'])
+        summary_parts.append("\nRisk Categories Analysis:")
+        for category, stats in category_stats.iterrows():
+            summary_parts.append(f"- {category}: {stats['count']} incidents, Total Score: {stats['sum']:.1f}, Avg: {stats['mean']:.2f}")
+    
+    # Temporal trends
+    if 'Date' in df.columns and 'Risikoscore' in df.columns:
+        monthly_trend = df.groupby(df['Date'].dt.to_period('M'))['Risikoscore'].mean()
+        if len(monthly_trend) > 1:
+            trend_direction = "increasing" if monthly_trend.iloc[-1] > monthly_trend.iloc[0] else "decreasing"
+            summary_parts.append(f"\nTrend Analysis: Risk scores are {trend_direction} over time")
+            summary_parts.append(f"Highest risk month: {monthly_trend.idxmax()} (avg: {monthly_trend.max():.2f})")
+            summary_parts.append(f"Lowest risk month: {monthly_trend.idxmin()} (avg: {monthly_trend.min():.2f})")
+    
+    # Financial impact
+    if 'Verluste' in df.columns:
+        total_losses = df['Verluste'].sum()
+        avg_losses = df['Verluste'].mean()
+        max_loss = df['Verluste'].max()
+        summary_parts.append(f"\nFinancial Impact: Total losses: {total_losses:.2f}, Average: {avg_losses:.2f}, Maximum single loss: {max_loss:.2f}")
+    
+    # Customer impact
+    if 'Kundenzahlen' in df.columns:
+        total_customers = df['Kundenzahlen'].sum()
+        avg_customers = df['Kundenzahlen'].mean()
+        summary_parts.append(f"\nCustomer Impact: Total affected customers: {total_customers}, Average per incident: {avg_customers:.1f}")
+    
+    return "\n".join(summary_parts)
+
+
+def parse_gpt_response(response: str) -> tuple[str, str]:
+    """Parses GPT response into summary and recommendations sections."""
+    # Try to split by common section headers
+    lower_response = response.lower()
+    
+    # Look for recommendations section
+    rec_markers = ['recommendations:', 'recommendation:', 'suggested actions:', 'action items:', 'next steps:']
+    rec_start = -1
+    
+    for marker in rec_markers:
+        pos = lower_response.find(marker)
+        if pos != -1:
+            rec_start = pos
+            break
+    
+    if rec_start != -1:
+        summary = response[:rec_start].strip()
+        recommendations = response[rec_start:].strip()
+        
+        # Clean up section headers
+        for marker in rec_markers:
+            recommendations = recommendations.replace(marker, '').replace(marker.title(), '').strip()
+    else:
+        # If no clear separation, split roughly in half
+        mid_point = len(response) // 2
+        # Find nearest sentence break
+        sentence_break = response.find('.', mid_point)
+        if sentence_break != -1:
+            summary = response[:sentence_break + 1].strip()
+            recommendations = response[sentence_break + 1:].strip()
+        else:
+            summary = response
+            recommendations = "Please review the analysis above for actionable insights."
+    
+    return summary, recommendations

@@ -25,7 +25,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 
-from .report_generator import generate_report_data
+from report_generator import generate_report_data
 
 
 ALLOWED_EXTENSIONS = {"csv"}
@@ -67,6 +67,7 @@ def index():
                 recommendations=report_data.get("recommendations"),
                 bar_chart=report_data.get("bar_chart"),
                 line_chart=report_data.get("line_chart"),
+                analysis_type=report_data.get("analysis_type", "Statistical")
             )
         else:
             error = "Bitte laden Sie eine gültige CSV‑Datei hoch."
