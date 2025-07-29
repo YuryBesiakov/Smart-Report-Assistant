@@ -26,36 +26,89 @@ An AI-powered business intelligence tool that automatically generates comprehens
 - **Responsive Design**: Clean, professional web interface
 - **Modular Architecture**: Easy to extend and customize
 - **Production Ready**: Comprehensive logging and error handling
+- **CI/CD Pipeline**: Automated testing, building, and deployment
+- **Docker Support**: Containerized deployment with orchestration
+- **Code Quality**: Automated linting, formatting, and security scanning
 
 ## 🚀 Quick Start
 
-### 1. **Clone the Repository**
+### **Option 1: Development Setup**
 ```bash
+# Clone the repository
 git clone https://github.com/YuryBesiakov/Smart-Report-Assistant.git
 cd Smart-Report-Assistant
-```
 
-### 2. **Install Dependencies**
-```bash
+# Automated setup (recommended)
+make setup              # Full environment setup
+# OR manually:
 pip install -r requirements.txt
-```
+pip install -r requirements-dev.txt
 
-### 3. **Configure OpenAI API (Optional)**
-```bash
-# Copy the example environment file
+# Configure environment
 cp .env.example .env
+# Edit .env with your OpenAI API key (optional)
 
-# Edit .env and add your OpenAI API key
-OPENAI_API_KEY=your-openai-api-key-here
+# Run the application
+make dev                # Using make
+# OR
+python app/main.py      # Direct run
 ```
 
-### 4. **Run the Application**
+### **Option 2: Docker Deployment**
 ```bash
-python app/main.py
+# Quick start with Docker
+docker-compose up --build
+
+# Or using deployment scripts
+./scripts/deploy.sh     # Linux/Mac
+scripts\deploy.bat      # Windows
 ```
 
-### 5. **Access the Web Interface**
+### **Option 3: CI/CD Development**
+```bash
+# Run all quality checks locally
+make ci                 # Tests, linting, security checks
+make test              # Run tests only
+make lint              # Code quality checks
+```
+### **Access the Web Interface**
 Open your browser and navigate to: `http://localhost:5000`
+
+## 🏗️ **CI/CD & DevOps Features**
+
+[![CI/CD Pipeline](https://github.com/YuryBesiakov/Smart-Report-Assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/YuryBesiakov/Smart-Report-Assistant/actions)
+
+### **Automated Pipeline**
+- ✅ **Multi-Python Testing** (3.9, 3.10, 3.11)
+- ✅ **Code Quality Checks** (flake8, black, mypy)
+- ✅ **Security Scanning** (bandit, safety)
+- ✅ **Docker Building** (multi-architecture)
+- ✅ **Automated Deployment** (staging → production)
+
+### **Development Commands**
+```bash
+make setup              # Full development setup
+make test              # Run test suite
+make test-cov          # Run tests with coverage
+make lint              # Code quality checks
+make format            # Auto-format code
+make ci                # Run all CI checks locally
+make docker-build      # Build Docker image
+make docker-run        # Run in container
+```
+
+### **Deployment**
+```bash
+# Local deployment
+docker-compose up --build
+
+# Production deployment
+./scripts/deploy.sh deploy
+./scripts/deploy.sh status
+./scripts/deploy.sh logs
+```
+
+📖 **Full CI/CD Documentation**: See [`CICD_GUIDE.md`](CICD_GUIDE.md)
 
 ## 📁 Project Structure
 
@@ -64,19 +117,22 @@ Smart-Report-Assistant/
 ├── app/
 │   ├── main.py              # Flask application entry point
 │   ├── report_generator.py  # Core analysis and GPT integration
-│   ├── templates/
-│   │   ├── upload.html      # File upload interface
-│   │   └── report.html      # Report display template
-│   ├── static/
-│   │   └── plots/           # Generated charts storage
+│   ├── templates/           # HTML templates
+│   ├── static/plots/        # Generated charts storage
 │   └── uploads/             # Uploaded files storage
-├── data/
-│   └── beispiel.csv         # Example dataset for testing
-├── .env.example             # Environment configuration template
-├── requirements.txt         # Python dependencies
-├── test_gpt.py             # GPT integration testing script
-├── GPT_SETUP.md            # Detailed GPT setup instructions
-└── README.md               # This file
+├── tests/                   # Test suite
+│   ├── test_main.py         # Flask app tests
+│   └── test_report_generator.py  # Core logic tests
+├── .github/workflows/       # CI/CD pipeline configuration
+├── scripts/                 # Deployment and setup scripts
+├── data/                    # Example datasets
+├── Dockerfile               # Container configuration
+├── docker-compose.yml       # Multi-service orchestration
+├── requirements.txt         # Production dependencies
+├── requirements-dev.txt     # Development dependencies
+├── pyproject.toml          # Project configuration
+├── Makefile                # Development commands
+└── CICD_GUIDE.md           # Complete DevOps documentation
 ```
 
 ## 🔑 OpenAI GPT Integration
@@ -176,15 +232,46 @@ python test_gpt.py
 
 ### **Development**
 ```bash
+# Local development server
 python app/main.py
+# OR with auto-reload
+make dev
 ```
 
-### **Production Recommendations**
-- Use a production WSGI server (e.g., Gunicorn)
-- Set up proper logging
-- Configure SSL/HTTPS
-- Use environment variables for all configuration
-- Monitor API usage and costs
+### **Docker Deployment**
+```bash
+# Development with Docker
+docker-compose up --build
+
+# Production deployment
+docker-compose --profile production up --build
+
+# Using deployment scripts
+./scripts/deploy.sh          # Linux/Mac
+scripts\deploy.bat           # Windows
+```
+
+### **Production Deployment**
+The project includes automated CI/CD with GitHub Actions:
+
+1. **Push to GitHub** → Triggers automated testing
+2. **Tests Pass** → Builds Docker image
+3. **Main Branch** → Deploys to staging automatically
+4. **Manual Approval** → Promotes to production
+
+**Production Features:**
+- Multi-architecture Docker images (AMD64/ARM64)
+- Nginx reverse proxy with SSL
+- Health checks and monitoring
+- Automatic rollback capabilities
+- Zero-downtime deployments
+
+### **Cloud Deployment Ready**
+- AWS ECS/EKS
+- Google Cloud Run/GKE
+- Azure Container Instances/AKS
+- DigitalOcean App Platform
+- Heroku (using container deployment)
 
 ## 🔄 Development Workflow
 
