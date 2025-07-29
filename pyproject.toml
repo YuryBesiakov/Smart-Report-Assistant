@@ -1,0 +1,153 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smart-report-assistant"
+version = "1.0.0"
+description = "AI-powered business intelligence tool for automated report generation"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Yury Besiakov", email = "yury.besiakov@example.com"},
+]
+maintainers = [
+    {name = "Yury Besiakov", email = "yury.besiakov@example.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Office/Business",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Framework :: Flask",
+]
+keywords = ["business intelligence", "report generation", "data analysis", "ai", "flask"]
+dependencies = [
+    "Flask>=2.3.0",
+    "pandas>=2.0.0",
+    "matplotlib>=3.7.0",
+    "Werkzeug>=2.3.0",
+    "openai>=1.0.0",
+    "python-dotenv>=1.0.0",
+]
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-flask>=1.2.0",
+    "flake8>=6.0.0",
+    "black>=23.0.0",
+    "mypy>=1.5.0",
+    "bandit>=1.7.0",
+    "safety>=2.3.0",
+    "pre-commit>=3.3.0",
+]
+prod = [
+    "gunicorn>=21.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/YuryBesiakov/Smart-Report-Assistant"
+Documentation = "https://github.com/YuryBesiakov/Smart-Report-Assistant/blob/main/README.md"
+Repository = "https://github.com/YuryBesiakov/Smart-Report-Assistant.git"
+"Bug Tracker" = "https://github.com/YuryBesiakov/Smart-Report-Assistant/issues"
+Changelog = "https://github.com/YuryBesiakov/Smart-Report-Assistant/blob/main/CHANGELOG.md"
+
+[project.scripts]
+smart-report = "app.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+"app" = [
+    "templates/*.html",
+    "static/plots/*.png",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py39', 'py310', 'py311']
+extend-exclude = '''
+/(
+  # Directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+exclude = [
+    "tests/",
+    "venv/",
+    ".venv/",
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = [
+    "tests",
+]
+python_files = [
+    "test_*.py",
+    "*_test.py",
+]
+python_classes = [
+    "Test*",
+]
+python_functions = [
+    "test_*",
+]
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*Protocol.*:",
+    "@abstractmethod",
+]

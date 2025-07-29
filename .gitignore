@@ -82,6 +82,8 @@ Thumbs.db
 # Project specific
 app/static/plots/*.png
 app/uploads/*.csv
+data/*.csv
+!data/beispiel.csv
 *.sqlite3
 *.db
 *.log

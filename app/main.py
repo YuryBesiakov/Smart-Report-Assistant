@@ -25,7 +25,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 
-from report_generator import generate_report_data
+from .report_generator import generate_report_data
 
 
 ALLOWED_EXTENSIONS = {"csv"}
