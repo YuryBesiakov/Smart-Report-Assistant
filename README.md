@@ -23,7 +23,7 @@ An AI-powered business intelligence tool that automatically generates comprehens
 ### 🔧 **Technical Features**
 - **Robust Error Handling**: Graceful fallback mechanisms
 - **Secure Configuration**: Environment-based API key management
-- **Responsive Design**: Clean, professional web interface
+- **Responsive Design**: Clean, professional web interface (German UI)
 - **Modular Architecture**: Easy to extend and customize
 - **Production Ready**: Comprehensive logging and error handling
 - **CI/CD Pipeline**: Automated testing, building, and deployment
@@ -74,9 +74,11 @@ make lint              # Code quality checks
 ### **Access the Web Interface**
 Open your browser and navigate to: `http://localhost:5000`
 
+**Note**: The web interface is currently in German. The application displays messages like "Bitte laden Sie eine gültige CSV‑Datei hoch" (Please upload a valid CSV file).
+
 ## 🏗️ **CI/CD & DevOps Features**
 
-[![CI/CD Pipeline](https://github.com/YuryBesiakov/Smart-Report-Assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/YuryBesiakov/Smart-Report-Assistant/actions)
+**Note**: CI/CD badge status depends on your GitHub repository configuration.
 
 ### **Automated Pipeline**
 - ✅ **Multi-Python Testing** (3.9, 3.10, 3.11)
@@ -297,8 +299,10 @@ def generate_custom_chart(df: pd.DataFrame) -> str:
 - [ ] **User Authentication**: Multi-user support
 - [ ] **Database Integration**: Persistent data storage
 - [ ] **API Endpoints**: RESTful API for programmatic access
-- [ ] **Docker Support**: Containerized deployment
 - [ ] **Real-time Updates**: WebSocket-based live updates
+- [ ] **Internationalization**: Multi-language support (currently German UI)
+- [ ] **Enhanced Data Processing**: Support for larger datasets
+- [ ] **Custom Report Templates**: User-defined report layouts
 
 ## 🤝 Contributing
 
@@ -329,11 +333,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Data Upload Issues**:
 - Verify CSV format matches expected structure
 - Check file permissions
-- Ensure file size is reasonable
+- Ensure file size is reasonable  
+- Note: Error messages are displayed in German
+
+**Language Note**:
+- The web interface uses German language
+- Error messages and labels are in German
+- Code comments are primarily in German
 
 ### **Getting Help**
 - 💬 **Issues**: [GitHub Issues](https://github.com/YuryBesiakov/Smart-Report-Assistant/issues)
 - 📖 **Documentation**: See `GPT_SETUP.md` for detailed GPT configuration
+- 🌐 **Language**: Interface is currently in German - see roadmap for internationalization plans
 
 ## 🙏 Acknowledgments
 
