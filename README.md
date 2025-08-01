@@ -67,9 +67,11 @@ scripts\deploy.bat      # Windows
 ### **Option 3: CI/CD Development**
 ```bash
 # Run all quality checks locally
-make ci                 # Tests, linting, security checks
-make test              # Run tests only
-make lint              # Code quality checks
+make ci                    # Tests, linting, security checks
+make test                  # Run unit tests only
+make test-all              # Run all tests (including integration)
+make test-integration      # Run GPT integration tests only
+make lint                  # Code quality checks
 ```
 ### **Access the Web Interface**
 Open your browser and navigate to: `http://localhost:5000`
@@ -89,14 +91,17 @@ Open your browser and navigate to: `http://localhost:5000`
 
 ### **Development Commands**
 ```bash
-make setup              # Full development setup
-make test              # Run test suite
-make test-cov          # Run tests with coverage
-make lint              # Code quality checks
-make format            # Auto-format code
-make ci                # Run all CI checks locally
-make docker-build      # Build Docker image
-make docker-run        # Run in container
+make setup                 # Full development setup
+make test                  # Run unit tests (excludes integration tests)
+make test-all              # Run all tests including integration tests
+make test-integration      # Run GPT integration tests only
+make test-cov              # Run unit tests with coverage
+make test-cov-all          # Run all tests with coverage
+make lint                  # Code quality checks
+make format                # Auto-format code
+make ci                    # Run all CI checks locally
+make docker-build          # Build Docker image
+make docker-run            # Run in container
 ```
 
 ### **Deployment**
@@ -124,7 +129,8 @@ Smart-Report-Assistant/
 │   └── uploads/             # Uploaded files storage
 ├── tests/                   # Test suite
 │   ├── test_main.py         # Flask app tests
-│   └── test_report_generator.py  # Core logic tests
+│   ├── test_report_generator.py  # Core logic tests (with mocks)
+│   └── test_gpt_integration.py   # GPT integration tests (real API calls)
 ├── .github/workflows/       # CI/CD pipeline configuration
 ├── scripts/                 # Deployment and setup scripts
 ├── data/                    # Example datasets
@@ -158,7 +164,10 @@ Smart-Report-Assistant/
 
 3. **Test the Integration**:
    ```bash
-   python test_gpt.py
+   # Run integration tests (requires valid API key)
+   make test-integration
+   # OR
+   pytest tests/test_gpt_integration.py -v
    ```
 
 ### **Analysis Modes**
@@ -211,9 +220,28 @@ python-dotenv>=1.0.0  # Environment management
 
 ## 🧪 Testing
 
+### **Run Tests**
+```bash
+# Unit tests only (fast, no API calls)
+make test
+
+# All tests including integration tests (requires API key)
+make test-all
+
+# Integration tests only (tests real GPT API)
+make test-integration
+
+# With coverage
+make test-cov-all
+```
+
 ### **Test GPT Integration**
 ```bash
-python test_gpt.py
+# Run GPT integration tests specifically
+pytest tests/test_gpt_integration.py -v
+
+# Skip integration tests
+pytest -m "not integration"
 ```
 
 ### **Test with Example Data**
@@ -281,7 +309,7 @@ The project includes automated CI/CD with GitHub Actions:
 1. **Analysis Functions**: Add to `report_generator.py`
 2. **Web Routes**: Extend `main.py`
 3. **Templates**: Modify HTML templates in `templates/`
-4. **Testing**: Update `test_gpt.py`
+4. **Testing**: Add unit tests to `/tests/`, integration tests with `@pytest.mark.integration`
 
 ### **Extending Visualizations**
 ```python
